@@ -35,7 +35,7 @@ export default function Home() {
           </div>
           <div className="relative">
             <div className="aspect-square rounded-[3rem] overflow-hidden rotate-3 shadow-2xl">
-              <img alt="Fresh vegetables box" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGGk1dNmHhadm7d0Cf1VSaWKzMuBRvACX4ZvY7mskBwkutivEgccSa_YRE72p7V24JlZRg7PyiuliZb-QiVbkWJ36u3p7rAjg9Tk6WawvwmpqjaI__dfEcbGAXuUUi6B7srsEpySen4Ob1yi35x0cO45b0shmi3moodRr-szK9cAwXzRt68VLQUbF2dsJoxwWYtFFr9Z0FdjYWl-rdwPEgzt98-KnnyUzBVqITiNIUCmKie1Stb7l1wCDEP7C5bi1Plac-vtB8Yzw"/>
+              <img alt="Fresh vegetables box" className="w-full h-full object-cover" src="https://lifestartseminars.com/wp-content/uploads/2018/01/fruit-veggie-basket.jpeg"/>
             </div>
             <div className="absolute -bottom-8 -left-8 bg-surface-container-lowest p-6 rounded-3xl shadow-xl flex items-center gap-4 -rotate-2">
               <div className="w-12 h-12 bg-tertiary-container rounded-full flex items-center justify-center">
