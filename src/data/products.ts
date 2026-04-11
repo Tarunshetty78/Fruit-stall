@@ -125,5 +125,19 @@ export const products: Product[] = [
     vitamins: 'Vitamin K & Antioxidants',     
     longDesc: 'Sweet, crisp, and refreshing. These fresh green grapes are perfect for snacking, blending into smoothies, or adding a juicy pop to fruit salads.',     
     category: 'Fruits'   
+  },
+  {
+    id: 'papaya',     
+    name: 'papaya',     
+    desc: 'Fresh & Juicy • 1kg',     
+    price: 150,     
+    unit: '1kg',     
+    tag: null,     
+    img: 'https://tse4.mm.bing.net/th/id/OIP.WLA4SnOF7h3Yk_N0eyIP-QHaFr?rs=1&pid=ImgDetMain&o=7&rm=3',     
+    available: true,     
+    origin: 'Local Vineyard',     
+    vitamins: 'Vitamin K & Antioxidants',     
+    longDesc: 'Sweet, crisp, and refreshing. These fresh green grapes are perfect for snacking, blending into smoothies, or adding a juicy pop to fruit salads.',     
+    category: 'Fruits'   
   }
 ];
