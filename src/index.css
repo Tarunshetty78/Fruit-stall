@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-on-primary: #d1ffc8;
+  --color-primary-dim: #025d16;
+  --color-on-secondary: #fff0e9;
+  --color-primary-fixed: #9df197;
+  --color-inverse-surface: #0a1008;
+  --color-on-tertiary-fixed: #301c00;
+  --color-on-tertiary-container: #4e3000;
+  --color-on-primary-container: #005c15;
+  --color-on-tertiary-fixed-variant: #5a3800;
+  --color-on-tertiary: #fff0e2;
+  --color-on-primary-fixed: #00460e;
+  --color-tertiary-fixed-dim: #e99b13;
+  --color-outline-variant: #a8afa2;
+  --color-error-dim: #b92902;
+  --color-tertiary-fixed: #f9a825;
+  --color-tertiary: #7f5200;
+  --color-on-primary-fixed-variant: #12661e;
+  --color-on-background: #2a3127;
+  --color-surface-container-low: #ebf3e3;
+  --color-secondary: #8f4816;
+  --color-on-secondary-fixed-variant: #813e0b;
+  --color-background: #f2f9ea;
+  --color-on-surface: #2a3127;
+  --color-error-container: #f95630;
+  --color-surface: #f2f9ea;
+  --color-on-secondary-container: #763502;
+  --color-secondary-container: #ffc5a5;
+  --color-on-surface-variant: #575e52;
+  --color-tertiary-dim: #704700;
+  --color-primary-container: #9df197;
+  --color-surface-container-highest: #d6e0cd;
+  --color-on-error-container: #520c00;
+  --color-surface-variant: #d6e0cd;
+  --color-on-secondary-fixed: #582500;
+  --color-primary-fixed-dim: #90e28a;
+  --color-surface-container-high: #dce6d4;
+  --color-surface-dim: #ccd8c4;
+  --color-surface-container: #e2ebda;
+  --color-surface-bright: #f2f9ea;
+  --color-tertiary-container: #f9a825;
+  --color-surface-tint: #176a21;
+  --color-primary: #176a21;
+  --color-secondary-fixed-dim: #ffb285;
+  --color-inverse-primary: #9df197;
+  --color-secondary-fixed: #ffc5a5;
+  --color-secondary-dim: #803d0a;
+  --color-on-error: #ffefec;
+  --color-error: #b02500;
+  --color-inverse-on-surface: #989f92;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline: #72796d;
+
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
+  --font-label: "Be Vietnam Pro", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+}
+
+.editorial-shadow {
+    box-shadow: 0 16px 40px rgba(42, 49, 39, 0.06);
+}
+.glass-nav {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
