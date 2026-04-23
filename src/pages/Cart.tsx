@@ -1,14 +1,91 @@
 import { Link } from 'react-router-dom';
-import { Minus, Plus, ArrowRight, ShieldCheck, Truck, CreditCard, CircleDot, Circle, Info, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, ArrowRight, ShieldCheck, Truck, Store, CircleDot, Circle, Info, ShoppingBag } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function Cart() {
-  const { items, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
+  const { items, updateQuantity, removeFromCart, clearCart, cartTotal, cartCount } = useCart();
+  const [customerName, setCustomerName] = useState('');
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<'success' | 'error' | null>(null);
   
-  const deliveryFee = cartTotal > 0 ? 40 : 0;
+  const deliveryFee = cartTotal > 0 && fulfillmentMethod === 'delivery' ? 40 : 0;
   const ecoPackaging = cartTotal > 0 ? 15 : 0;
   const finalTotal = cartTotal + deliveryFee + ecoPackaging;
+
+  const handleCheckout = async () => {
+    if (!customerName.trim()) {
+      setStatusType('error');
+      setStatusMessage('Please enter your name before checkout.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatusMessage(null);
+    setStatusType(null);
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: customerName.trim(),
+          paymentMethod: fulfillmentMethod === 'delivery' ? 'Home Delivery' : 'In-person Pickup',
+          items: items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            unit: item.unit,
+            lineTotal: item.price * item.quantity,
+          })),
+          totals: {
+            subtotal: cartTotal,
+            deliveryFee,
+            ecoPackaging,
+            grandTotal: finalTotal,
+          },
+        }),
+      });
+
+      const data = (await response.json()) as { message?: string; orderId?: string };
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to place order.');
+      }
+
+      clearCart();
+      setCustomerName('');
+      setStatusType('success');
+      setStatusMessage(`Order placed successfully. Reference: ${data.orderId || 'N/A'}. Thank you for shopping with us!`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to place order.';
+      setStatusType('error');
+      setStatusMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (items.length === 0 && statusType === 'success' && statusMessage) {
+    return (
+      <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 py-24 min-h-[60vh] flex flex-col items-center justify-center text-center">
+        <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <ShieldCheck className="w-10 h-10 text-primary" />
+        </div>
+        <h1 className="text-4xl font-extrabold text-on-background mb-4">Order Confirmed</h1>
+        <p className="text-on-surface-variant text-lg max-w-xl mb-8">{statusMessage}</p>
+        <Link to="/shop" className="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+          Continue Shopping
+        </Link>
+      </motion.main>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -86,7 +163,7 @@ export default function Cart() {
               </div>
               <div className="flex justify-between text-on-surface-variant">
                 <span>Delivery Fee</span>
-                <span className="font-medium text-on-background">₹{deliveryFee}</span>
+                <span className="font-medium text-on-background">{fulfillmentMethod === 'pickup' ? 'Free' : `₹${deliveryFee}`}</span>
               </div>
               <div className="flex justify-between text-on-surface-variant">
                 <span>Eco-Packaging</span>
@@ -100,28 +177,66 @@ export default function Cart() {
             </div>
 
             <div className="space-y-6 mb-8">
-              <h3 className="font-bold text-sm uppercase tracking-widest text-on-surface-variant">Payment Method</h3>
-              <div className="space-y-3">
-                <label className="flex items-center justify-between p-4 rounded-2xl border-2 border-primary bg-primary-container/10 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <CircleDot className="text-primary w-5 h-5" />
-                    <span className="font-bold">Cash on Delivery</span>
-                  </div>
-                  <Truck className="text-primary w-5 h-5" />
+              <div>
+                <label htmlFor="customerName" className="font-bold text-sm uppercase tracking-widest text-on-surface-variant block mb-3">
+                  Customer Name
                 </label>
-                <label className="flex items-center justify-between p-4 rounded-2xl border-2 border-transparent bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
+                <input
+                  id="customerName"
+                  type="text"
+                  value={customerName}
+                  onChange={(event) => setCustomerName(event.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full rounded-2xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-on-background focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+
+              <h3 className="font-bold text-sm uppercase tracking-widest text-on-surface-variant">Fulfillment Method</h3>
+              <div className="space-y-3">
+                <label className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-colors ${fulfillmentMethod === 'delivery' ? 'border-primary bg-primary-container/10' : 'border-transparent bg-surface-container-low hover:bg-surface-container'}`}>
                   <div className="flex items-center gap-3">
-                    <Circle className="text-on-surface-variant w-5 h-5" />
-                    <span className="font-bold text-on-surface-variant">UPI / Card</span>
+                    {fulfillmentMethod === 'delivery' ? <CircleDot className="text-primary w-5 h-5" /> : <Circle className="text-on-surface-variant w-5 h-5" />}
+                    <span className={`font-bold ${fulfillmentMethod === 'delivery' ? 'text-on-background' : 'text-on-surface-variant'}`}>Delivery</span>
                   </div>
-                  <CreditCard className="text-on-surface-variant w-5 h-5" />
+                  <Truck className={`w-5 h-5 ${fulfillmentMethod === 'delivery' ? 'text-primary' : 'text-on-surface-variant'}`} />
+                  <input
+                    type="radio"
+                    name="fulfillment"
+                    className="sr-only"
+                    checked={fulfillmentMethod === 'delivery'}
+                    onChange={() => setFulfillmentMethod('delivery')}
+                  />
+                </label>
+                <label className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-colors ${fulfillmentMethod === 'pickup' ? 'border-primary bg-primary-container/10' : 'border-transparent bg-surface-container-low hover:bg-surface-container'}`}>
+                  <div className="flex items-center gap-3">
+                    {fulfillmentMethod === 'pickup' ? <CircleDot className="text-primary w-5 h-5" /> : <Circle className="text-on-surface-variant w-5 h-5" />}
+                    <span className={`font-bold ${fulfillmentMethod === 'pickup' ? 'text-on-background' : 'text-on-surface-variant'}`}>In-person Pickup</span>
+                  </div>
+                  <Store className={`w-5 h-5 ${fulfillmentMethod === 'pickup' ? 'text-primary' : 'text-on-surface-variant'}`} />
+                  <input
+                    type="radio"
+                    name="fulfillment"
+                    className="sr-only"
+                    checked={fulfillmentMethod === 'pickup'}
+                    onChange={() => setFulfillmentMethod('pickup')}
+                  />
                 </label>
               </div>
             </div>
 
-            <button className="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              Confirm Order <ArrowRight className="w-5 h-5" />
+            <button
+              onClick={handleCheckout}
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Placing Order...' : 'Confirm Order'} <ArrowRight className="w-5 h-5" />
             </button>
+
+            {statusMessage && (
+              <p className={`mt-4 text-sm ${statusType === 'success' ? 'text-green-600' : 'text-error'}`}>
+                {statusMessage}
+              </p>
+            )}
 
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-on-surface-variant">
               <ShieldCheck className="w-4 h-4" />
