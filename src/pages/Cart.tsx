@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, clearCart, cartTotal, cartCount } = useCart();
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
   const [customerName, setCustomerName] = useState('');
   const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +29,7 @@ export default function Cart() {
     setStatusType(null);
 
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${apiBaseUrl}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,10 +54,13 @@ export default function Cart() {
         }),
       });
 
-      const data = (await response.json()) as { message?: string; orderId?: string };
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json')
+        ? ((await response.json()) as { message?: string; orderId?: string })
+        : ({ message: await response.text() } as { message?: string; orderId?: string });
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to place order.');
+        throw new Error(data.message || `Failed to place order (HTTP ${response.status}).`);
       }
 
       clearCart();
@@ -64,7 +68,12 @@ export default function Cart() {
       setStatusType('success');
       setStatusMessage(`Order placed successfully. Reference: ${data.orderId || 'N/A'}. Thank you for shopping with us!`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to place order.';
+      const message =
+        error instanceof TypeError
+          ? 'Unable to reach the order service. Please verify backend URL/CORS settings and try again.'
+          : error instanceof Error
+            ? error.message
+            : 'Failed to place order.';
       setStatusType('error');
       setStatusMessage(message);
     } finally {

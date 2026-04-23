@@ -38,6 +38,13 @@ Copy `.env.example` to `.env` and set:
 - `TELEGRAM_BOT_TOKEN=...`
 - `TELEGRAM_CHAT_ID=...`
 - `TELEGRAM_MOCK_MODE=false`
+- `CORS_ORIGIN=*` (or set your frontend URL, for example `https://your-frontend-domain.com`)
+
+For frontend production deployments where API is hosted separately, set:
+
+- `VITE_API_BASE_URL=https://your-backend-domain.com`
+
+If frontend and backend are served from the same origin, you can keep `VITE_API_BASE_URL` unset.
 
 Use `TELEGRAM_MOCK_MODE=true` if you want to demo backend logic without sending real Telegram messages.
 
@@ -76,3 +83,20 @@ Run in two terminals:
 
 Then open the app, add products to cart, enter customer name, and click `Confirm Order`.
 The backend sends a formatted order message to your Telegram chat.
+
+## Vercel deployment notes
+
+If you deploy this app to Vercel, the API routes must exist under the root `api/` folder.
+This repository now includes:
+
+- `api/orders.ts`
+- `api/health.ts`
+
+Set these Vercel environment variables in Project Settings:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- `TELEGRAM_MOCK_MODE` (`true` or `false`)
+- `CORS_ORIGIN` (set to your frontend origin, or leave unset for default behavior)
+
+When frontend and API are on the same Vercel domain, keep frontend requests as `/api/orders`.

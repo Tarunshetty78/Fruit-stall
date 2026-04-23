@@ -1,34 +1,21 @@
-import express from 'express';
-import dotenv from 'dotenv';
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
-dotenv.config();
-
-const app = express();
-const port = Number(process.env.PORT || 8787);
-const corsOrigin = process.env.CORS_ORIGIN || '*';
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  return next();
-});
-
-app.use(express.json());
-
-interface CheckoutItem {
+type CheckoutItem = {
   id: string;
   name: string;
   quantity: number;
   unitPrice: number;
   unit: string;
   lineTotal: number;
-}
+};
 
-interface CheckoutRequest {
+type CheckoutRequest = {
   customerName: string;
   paymentMethod: string;
   items: CheckoutItem[];
@@ -38,15 +25,18 @@ interface CheckoutRequest {
     ecoPackaging: number;
     grandTotal: number;
   };
-}
+};
 
-const escapeHtml = (value: string) =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+const setCorsHeaders = (req: any, res: any) => {
+  const configuredOrigin = process.env.CORS_ORIGIN;
+  const requestOrigin = req.headers.origin;
+
+  // Reflect request origin when allowed; fallback to wildcard for simple setups.
+  const allowOrigin = configuredOrigin || requestOrigin || '*';
+  res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+};
 
 const formatTelegramMessage = (orderId: string, payload: CheckoutRequest) => {
   const itemLines = payload.items
@@ -57,12 +47,12 @@ const formatTelegramMessage = (orderId: string, payload: CheckoutRequest) => {
     .join('\n');
 
   return [
-    `NEW FRUIT STALL ORDER`,
+    'NEW FRUIT STALL ORDER',
     `Order ID: ${orderId}`,
     `Customer: ${escapeHtml(payload.customerName)}`,
     `Payment: ${escapeHtml(payload.paymentMethod)}`,
     '',
-    `Items:`,
+    'Items:',
     itemLines,
     '',
     `Subtotal: Rs.${payload.totals.subtotal}`,
@@ -112,19 +102,21 @@ const sendTelegramMessage = async (text: string) => {
   }
 };
 
-app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    service: 'fruit-stall-backend',
-    telegramMockMode: process.env.TELEGRAM_MOCK_MODE === 'true',
-  });
-});
+export default async function handler(req: any, res: any) {
+  setCorsHeaders(req, res);
 
-app.post('/api/orders', async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed.' });
+  }
+
   try {
     const payload = req.body as CheckoutRequest;
 
-    if (!payload.customerName || !payload.customerName.trim()) {
+    if (!payload?.customerName || !payload.customerName.trim()) {
       return res.status(400).json({ message: 'Customer name is required.' });
     }
 
@@ -152,8 +144,4 @@ app.post('/api/orders', async (req, res) => {
     const message = error instanceof Error ? error.message : 'Failed to submit order.';
     return res.status(500).json({ message });
   }
-});
-
-app.listen(port, () => {
-  console.log(`Fruit stall backend listening on http://localhost:${port}`);
-});
+}
