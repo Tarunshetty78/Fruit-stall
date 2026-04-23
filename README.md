@@ -84,6 +84,101 @@ Run in two terminals:
 Then open the app, add products to cart, enter customer name, and click `Confirm Order`.
 The backend sends a formatted order message to your Telegram chat.
 
+## How the backend works (simple explanation)
+
+Think of the backend as a **middle helper** between your website and Telegram.
+
+When someone clicks **Confirm Order** in the cart:
+
+1. The website (frontend) collects the cart items and customer name and sends them to the backend at `POST /api/orders`.
+2. The backend checks if the data is valid — is there a customer name? Are there items in the cart? Are all quantities greater than zero?
+3. The backend creates a unique order ID like `FS-17123456789` using the current timestamp.
+4. The backend formats a clean, readable text message with all the order details.
+5. The backend sends that message to your Telegram chat using your bot.
+6. The backend replies to the website with success (or an error), and the website shows that to the customer.
+
+### Backend files
+
+| File | Purpose |
+|------|---------|
+| `server/index.ts` | Local Express server — used when running backend on your own computer |
+| `api/orders.ts` | Vercel serverless order endpoint — used when deployed to Vercel |
+| `api/health.ts` | Vercel serverless health endpoint — used when deployed to Vercel |
+
+The same logic exists in both places so the app works for:
+- **local development** (`npm run server`)
+- **Vercel deployment** (automatic `/api/*` routes)
+
+### Endpoints
+
+#### `GET /api/health`
+
+A quick ping to check if the backend is alive and running.
+
+Returns:
+```json
+{ "ok": true, "service": "fruit-stall-backend", "telegramMockMode": false }
+```
+
+#### `POST /api/orders`
+
+Receives the checkout order as JSON and sends a Telegram message.
+
+**Validates:**
+- `customerName` is not empty
+- `items` array is not empty
+- every item has a quantity greater than zero
+
+**On success** → returns `201` with `orderId`
+
+**On bad input** → returns `400` with an error message
+
+**On Telegram/config problems** → returns `500` with an error message
+
+### How Telegram sending works
+
+The backend uses two environment variables:
+
+- `TELEGRAM_BOT_TOKEN` — identifies which bot to use
+- `TELEGRAM_CHAT_ID` — the chat or group where messages are sent
+
+It calls the Telegram API at:
+
+```
+https://api.telegram.org/bot<YOUR_TOKEN>/sendMessage
+```
+
+If Telegram replies with an error (wrong token, wrong chat ID, etc.), the backend catches it and returns that error to the frontend.
+
+### Mock mode (safe demo mode)
+
+If you set `TELEGRAM_MOCK_MODE=true` in your `.env`:
+
+- The backend does **not** send any real Telegram messages.
+- Instead, it prints the message in the server console (terminal).
+
+This is great for testing the full checkout flow without spamming a real chat or needing a real bot token.
+
+### CORS — what it is and why it matters
+
+CORS (Cross-Origin Resource Sharing) controls which websites are allowed to call your backend.
+
+- `CORS_ORIGIN=*` → allow any website to call your backend (easy for demos and local testing)
+- `CORS_ORIGIN=https://your-frontend.com` → only your specific frontend can call it (better for production)
+
+### How the frontend connects to the backend
+
+In `src/pages/Cart.tsx`, when you click **Confirm Order**, the cart page sends an HTTP POST request to:
+
+```
+${VITE_API_BASE_URL}/api/orders
+```
+
+- If `VITE_API_BASE_URL` is **not set** → it calls `/api/orders` on the same domain (works when frontend and backend share a domain, like on Vercel).
+- If `VITE_API_BASE_URL` **is set** → it calls that full URL (use this when frontend and backend are hosted separately).
+
+---
+
 ## Vercel deployment notes
 
 If you deploy this app to Vercel, the API routes must exist under the root `api/` folder.
