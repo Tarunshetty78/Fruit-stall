@@ -2,6 +2,45 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
+# Fruit Stall 🍎🛒
+
+**Fruit Stall** is a modern e-commerce web application for browsing and purchasing fresh fruits online. Customers can explore products by category, view detailed product pages, manage a shopping cart, and place orders — which are instantly delivered as formatted messages to a Telegram chat via a bot. The app also integrates Google Gemini AI to enhance the shopping experience. It is designed to run locally for development and can be deployed seamlessly to Vercel with serverless API routes.
+
+---
+
+## Technologies Used
+
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **React 19** | UI component library |
+| **TypeScript** | Type-safe JavaScript |
+| **Vite 6** | Lightning-fast dev server and build tool |
+| **Tailwind CSS v4** | Utility-first CSS styling |
+| **React Router DOM v7** | Client-side routing (Home, Shop, Product, Cart pages) |
+| **Lucide React** | Icon library |
+| **Motion (Framer Motion)** | Animations and transitions |
+| **@google/genai (Gemini AI)** | Google Gemini AI integration |
+
+### Backend
+| Technology | Purpose |
+|---|---|
+| **Node.js** | JavaScript runtime for the server |
+| **Express** | HTTP server and REST API (`/api/health`, `/api/orders`) |
+| **TypeScript** | Type-safe server code |
+| **tsx** | Runs TypeScript server files directly without compiling |
+| **dotenv** | Loads environment variables from `.env` |
+| **Telegram Bot API** | Sends formatted order notifications to Telegram |
+
+### Deployment & Dev Tools
+| Technology | Purpose |
+|---|---|
+| **Vercel** | Hosting platform with serverless functions (`api/` folder) |
+| **Autoprefixer** | CSS vendor prefix handling |
+| **npm** | Package manager |
+
+---
+
 # Run and deploy your AI Studio app
 
 This contains everything you need to run your app locally.
