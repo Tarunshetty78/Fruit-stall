@@ -50,7 +50,7 @@ export const products: Product[] = [
     unit: 'kg',
     tag: 'OUT OF SEASON',
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA0o7szFUw-EFUcZ4dtTC72pncRodTEjB5jIfh9fBD-lTtgT59nI4TOTCT86NCRV4P94bCRMYtf2NHujt4EyZDDscx0CcIP5Txu3rJ48rRR0PJDvxpp5HoIP6RbtvKSo49O7ivgsPxBpfeV5n6CzySkuLpqdi8k6vrulKBGTbJSV759rasHAcYVtGJIOh3sSvMbqsDeNi1J6qvYTtyiKsf4u_hbQsxhaHCFpN3EplY-9z46If-XUISYu9hMihy9fIdUNXBK65QxBpM',
-    available: false,
+    available: true,
     origin: 'Ratnagiri Orchards',
     vitamins: 'Rich in A & C',
     longDesc: 'Sweet and juicy seasonal mangoes. Hand-picked from the sundrenched orchards, these mangoes represent the pinnacle of tropical flavor. Nature doesn\'t rush. Our mangoes are only harvested when they achieve peak sun-ripeness.',
